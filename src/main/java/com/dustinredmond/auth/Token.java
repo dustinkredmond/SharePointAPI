@@ -1,17 +1,14 @@
 package com.dustinredmond.auth;
 
-public class Token {
+public final class Token {
 
     private final String rtFa;
     private final String fedAuth;
-    private String domain;
+    private final String domain;
 
-    Token(String rtFa, String fedAuth) {
+    Token(String rtFa, String fedAuth, String domain) {
         this.rtFa = rtFa;
         this.fedAuth = fedAuth;
-    }
-
-    public void setDomain(String domain) {
         this.domain = domain;
     }
 
@@ -25,8 +22,8 @@ public class Token {
         return this.fedAuth;
     }
 
-    static Token of(String left, String right) {
-        return new Token(left, right);
+    static Token of(String rtFa, String fedAuth, String domain) {
+        return new Token(rtFa, fedAuth, domain);
     }
 
 }

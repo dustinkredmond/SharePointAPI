@@ -33,7 +33,6 @@ public class SharePointTokenFactory {
         Token authToken;
         try {
             authToken = submitTokenToDomain(domain, requestToken(domain,username,password));
-            authToken.setDomain(domain);
             return authToken;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -141,7 +140,7 @@ public class SharePointTokenFactory {
                 }
             }
         }
-        return Token.of(rtFa, fedAuth);
+        return Token.of(rtFa, fedAuth, domain);
     }
 
     private static final String MICROSOFT_STS = "https://login.microsoftonline.com/extSTS.srf";
