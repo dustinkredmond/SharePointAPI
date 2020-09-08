@@ -1,34 +1,25 @@
-import com.dustinredmond.auth.SharePointAPI;
-import com.dustinredmond.auth.SharePointTokenFactory;
-import com.dustinredmond.auth.Token;
-import com.google.gson.*;
+import com.dustinredmond.sharepoint.SharePointAPI;
+import com.dustinredmond.sharepoint.SharePointTokenFactory;
+import com.dustinredmond.sharepoint.Token;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.math.BigDecimal;
-import java.util.Scanner;
 
 public class Test {
 
     public static void main(String[] args) {
 
-        String username, password, domain;
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Enter username:");
-        username = sc.nextLine();
-        System.out.println("Enter password:");
-        password = sc.nextLine();
-        System.out.println("Enter SharePoint subdomain:");
-        domain = sc.nextLine();
+        String username = "aUser"; // e.g. admin@myCompany.com
+        String password = "theirPassword";
+        // This is the subdomain of SharePoint, if your SharePoint url were
+        //      https://myCompany.sharepoint.com/
+        // You would supply the domain as 'myCompany'
+        String domain = "myCompany";
 
-        if (username == null || password == null || domain == null ||
-                username.isEmpty() || password.isEmpty() || domain.isEmpty()) {
-            System.out.println("You must provide a username, " +
-                    "password, and the SharePoint subdomain.");
-            return;
-        }
         // We have to create our Token for authentication
-        //  1. Pass in username (nobody@example.com)
-        //  2. Pass in our password
-        //  3. Pass in the SharePoint subdomain e.g. myCompany
         Token token = SharePointTokenFactory.getToken(username, password, domain);
         // We can now access API methods through the SharePointAPI class
         SharePointAPI api = new SharePointAPI(token);
@@ -42,7 +33,7 @@ public class Test {
         // We can use Google's Gson library to make our JSON print prettily
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String prettyJson = gson.toJson(JsonParser.parseString(invoice));
-        //System.out.println(prettyJson);
+        System.out.println(prettyJson);
 
         // Using Gson's JsonParser class, we can get our Invoice as an "object" of sorts
         JsonObject rootElement = JsonParser.parseString(invoice).getAsJsonObject();

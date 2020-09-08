@@ -1,4 +1,4 @@
-package com.dustinredmond.auth;
+package com.dustinredmond.sharepoint;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;

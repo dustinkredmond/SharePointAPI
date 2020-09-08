@@ -1,4 +1,4 @@
-package com.dustinredmond.auth;
+package com.dustinredmond.sharepoint;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.w3c.dom.Document;

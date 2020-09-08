@@ -1,4 +1,4 @@
-package com.dustinredmond.auth;
+package com.dustinredmond.sharepoint;
 
 public final class Token {
 
