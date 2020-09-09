@@ -66,7 +66,7 @@ public class SharePointAPI {
      * @return An instance of the SharePointAPI for making requests to SharePoint
      */
     public static SharePointAPI getInstance(String username, String password, String domain) {
-        return new SharePointAPI(SharePointTokenFactory.getToken(username, password, domain));
+        return new SharePointAPI(TokenFactory.getToken(username, password, domain));
     }
 
 }

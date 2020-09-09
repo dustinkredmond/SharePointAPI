@@ -1,5 +1,5 @@
 import com.dustinredmond.sharepoint.SharePointAPI;
-import com.dustinredmond.sharepoint.SharePointTokenFactory;
+import com.dustinredmond.sharepoint.TokenFactory;
 import com.dustinredmond.sharepoint.Token;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,7 +20,7 @@ public class Test {
         String domain = "myCompany";
 
         // We have to create our Token for authentication
-        Token token = SharePointTokenFactory.getToken(username, password, domain);
+        Token token = TokenFactory.getToken(username, password, domain);
         // We can now access API methods through the SharePointAPI class
         SharePointAPI api = new SharePointAPI(token);
 

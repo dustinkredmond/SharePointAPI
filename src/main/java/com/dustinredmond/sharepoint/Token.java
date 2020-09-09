@@ -35,7 +35,7 @@ public final class Token {
      */
     @Deprecated(since = "1.0.1")
     public static Token create(String username, String password, String domain) {
-        return SharePointTokenFactory.getToken(username, password, domain);
+        return TokenFactory.getToken(username, password, domain);
     }
 
 }

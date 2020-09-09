@@ -25,7 +25,7 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
-public class SharePointTokenFactory {
+public class TokenFactory {
 
     public static Token getToken(String username, String password, String domain) {
         username = StringEscapeUtils.escapeXml11(username);
