@@ -1,51 +1,23 @@
 package com.dustinredmond.sharepoint;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import static com.dustinredmond.sharepoint.SharePointRequests.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
+/**
+ * Constructs an instance of the SharePointAPI,
+ * all public API is available through instance methods of this class
+ */
 public class SharePointAPI {
 
     private final Token authToken;
 
-
+    /**
+     * Takes in a token as a parameter and constructs
+     * a class through which we access the SharePoint API. Use the
+     * SharePointTokenFactory to get an instance of Token
+     * @param authToken com.dustinredmond.sharepoint.Token with which to authenticate to SharePoint
+     */
     public SharePointAPI(Token authToken) {
         this.authToken = authToken;
-    }
-
-    /**
-     * Returns the contextinfo String obtained by sending
-     * a GET request to https://yourDomain.sharepoint.com/_api/contextinfo
-     * @return SharePoint's /_api/contextinfo as a String
-     * @throws RuntimeException If the response's status code is other than 200
-     */
-    @SuppressWarnings("unused")
-    public String contextInfo() {
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost get = new HttpPost("https://" + this.authToken.getDomain() + ".sharepoint.com/_api/contextinfo");
-            get.addHeader("Cookie", String.format("%s;%s", this.authToken.getRtFa(), this.authToken.getFedAuth()));
-            get.addHeader("accept", "application/json;odata=verbose");
-            HttpResponse response = httpClient.execute(get);
-            if (response.getStatusLine().getStatusCode() == 200) {
-                return inStreamToString(response.getEntity().getContent());
-            } else {
-                throw new RuntimeException("Error code: " + response.getStatusLine().getStatusCode());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -56,7 +28,7 @@ public class SharePointAPI {
      * @throws RuntimeException If the response's status code is other than 200
      */
     public String get(String path) {
-        return getRequest("https://" + this.authToken.getDomain() + ".sharepoint.com/" + path);
+        return doGet(path, authToken);
     }
 
     /**
@@ -69,7 +41,7 @@ public class SharePointAPI {
      */
     @SuppressWarnings("unused")
     public String post(String path, String data, String formDigestValue) {
-        return postRequest(path, data, formDigestValue);
+        return doPost(path, data, formDigestValue, authToken);
     }
 
     /**
@@ -81,82 +53,20 @@ public class SharePointAPI {
      */
     @SuppressWarnings("unused")
     public String delete(String path, String formDigestValue) {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpDelete del = new HttpDelete("https://" + authToken.getDomain() + ".sharepoint.com/" + path);
-            del.addHeader("Cookie", authToken.getRtFa() + ";" + authToken.getFedAuth());
-            del.addHeader("accept", "application/json;odata=verbose");
-            del.addHeader("content-type", "application/json;odata=verbose");
-            del.addHeader("X-RequestDigest", formDigestValue);
-            del.addHeader("IF-MATCH", "*");
-            HttpResponse response = client.execute(del);
-            if (response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 204) {
-                throw new RuntimeException("Error code: " + response.getStatusLine().getStatusCode());
-            }
-            if (response.getEntity() == null || response.getEntity().getContent() == null) {
-                return null;
-            } else {
-                return inStreamToString(response.getEntity().getContent());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return doDelete(path, formDigestValue, authToken);
     }
 
-    private String getRequest(String url) {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Cookie", String.format("%s;%s", this.authToken.getRtFa(), this.authToken.getFedAuth()));
-            httpGet.addHeader("accept", "application/json;odata=verbose");
-            HttpResponse response = client.execute(httpGet);
-            if (response.getStatusLine().getStatusCode() == 200) {
-                return inStreamToString(response.getEntity().getContent());
-            } else {
-                throw new RuntimeException("Error code: " + response.getStatusLine().getStatusCode());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    /**
+     * Gets an instance of the SharePointAPI class.
+     * Provided as a convenience method, to avoid having to create
+     * a token via SharePointTokenFactory.getToken()
+     * @param username The SharePoint username e.g. person@example.com
+     * @param password The SharePoint user's password
+     * @param domain The subdomain of SharePoint
+     * @return An instance of the SharePointAPI for making requests to SharePoint
+     */
+    public static SharePointAPI getInstance(String username, String password, String domain) {
+        return new SharePointAPI(SharePointTokenFactory.getToken(username, password, domain));
     }
 
-    private String postRequest(String path, String data, String formDigestValue) {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost post = new HttpPost("https://" + authToken.getDomain() + ".sharepoint.com/" + path);
-            post.addHeader("Cookie", authToken.getRtFa() + ";" + authToken.getFedAuth());
-            post.addHeader("accept", "application/json;odata=verbose");
-            post.addHeader("content-type", "application/json;odata=verbose");
-            post.addHeader("X-RequestDigest", formDigestValue);
-            post.addHeader("IF-MATCH", "*");
-
-            if (data != null) {
-                StringEntity input = new StringEntity(data, StandardCharsets.UTF_8);
-                input.setContentType("application/json");
-                post.setEntity(input);
-            }
-
-            HttpResponse response = client.execute(post);
-            if (response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 204) {
-                throw new RuntimeException("Error code: " + response.getStatusLine().getStatusCode());
-            }
-            if (response.getEntity() == null || response.getEntity().getContent() == null) {
-                return null;
-            } else {
-                return inStreamToString(response.getEntity().getContent());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String inStreamToString(InputStream in) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Charset cs = Charset.forName(StandardCharsets.UTF_8.name());
-        try (Reader reader = new BufferedReader(new InputStreamReader(in, cs))) {
-            int c;
-            while ((c = reader.read()) != -1) {
-                sb.append((char) c);
-            }
-        }
-        return sb.toString();
-    }
 }

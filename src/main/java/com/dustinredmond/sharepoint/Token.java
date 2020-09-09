@@ -26,4 +26,16 @@ public final class Token {
         return new Token(rtFa, fedAuth, domain);
     }
 
+    /**
+     * Deprecated, use SharePointTokenFactory.getToken() instead
+     * @param username SharePoint username (email address) e.g. person@example.com
+     * @param password SharePoint user's password
+     * @param domain The subdomain of the SharePoint site e.g. myCompany
+     * @return A token suitable for creating an instance of code SharePointAPI
+     */
+    @Deprecated(since = "1.0.1")
+    public static Token create(String username, String password, String domain) {
+        return SharePointTokenFactory.getToken(username, password, domain);
+    }
+
 }
