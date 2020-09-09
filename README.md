@@ -26,6 +26,9 @@ class TestSharePoint {
     domain  =       "myCompany"; // If your site is https://myCompany.sharepoint.com/
 
     SharePointAPI api = new SharePointAPI(TokenFactory.getToken(user,pass,domain));
+    
+    // You could also use below, if you like it better
+    // SharePointAPI api = SharePointAPI.getInstance(user,pass,domain));
     }
 }
     
