@@ -14,6 +14,30 @@ import java.nio.charset.StandardCharsets;
 
 public class SharePointRequests {
 
+    protected static String getFormDigestValue(Token auth) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpPost post = new HttpPost("https://" + auth.getDomain() + ".sharepoint.com/_api/contextinfo");
+            post.addHeader("Cookie", auth.getRtFa() + ";" + auth.getFedAuth());
+            post.addHeader("accept", "application/json;odata=verbose");
+            post.addHeader("content-type", "application/json;odata=verbose");
+
+            HttpResponse response = client.execute(post);
+            if (response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 204) {
+                throw new RuntimeException("Error code: " + response.getStatusLine().getStatusCode());
+            }
+            if (response.getEntity() == null || response.getEntity().getContent() == null) {
+                return null;
+            } else {
+                String json = inStreamToString(response.getEntity().getContent());
+                int indexOfDigest = json.indexOf("\"FormDigestValue\":\"");
+                String digestStart =  json.substring(indexOfDigest+19);
+                return digestStart.substring(0, digestStart.indexOf("\""));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected static String doGet(String url, Token authToken) {
         final String urlPath = "https://" + authToken.getDomain() + ".sharepoint.com/" + url;
         try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -31,13 +55,13 @@ public class SharePointRequests {
         }
     }
 
-    protected static String doPost(String path, String data, String formDigestValue, Token authToken) {
+    protected static String doPost(String path, String data, Token authToken) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpPost post = new HttpPost("https://" + authToken.getDomain() + ".sharepoint.com/" + path);
             post.addHeader("Cookie", authToken.getRtFa() + ";" + authToken.getFedAuth());
             post.addHeader("accept", "application/json;odata=verbose");
             post.addHeader("content-type", "application/json;odata=verbose");
-            post.addHeader("X-RequestDigest", formDigestValue);
+            post.addHeader("X-RequestDigest", getFormDigestValue(authToken));
             post.addHeader("IF-MATCH", "*");
 
             if (data != null) {
@@ -60,13 +84,13 @@ public class SharePointRequests {
         }
     }
 
-    protected static String doDelete(String path, String formDigestValue, Token authToken) {
+    protected static String doDelete(String path, Token authToken) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpDelete del = new HttpDelete("https://" + authToken.getDomain() + ".sharepoint.com/" + path);
             del.addHeader("Cookie", authToken.getRtFa() + ";" + authToken.getFedAuth());
             del.addHeader("accept", "application/json;odata=verbose");
             del.addHeader("content-type", "application/json;odata=verbose");
-            del.addHeader("X-RequestDigest", formDigestValue);
+            del.addHeader("X-RequestDigest", getFormDigestValue(authToken));
             del.addHeader("IF-MATCH", "*");
             HttpResponse response = client.execute(del);
             if (response.getStatusLine().getStatusCode() != 200 && response.getStatusLine().getStatusCode() != 204) {

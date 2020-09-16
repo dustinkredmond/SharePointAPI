@@ -41,7 +41,7 @@ public class SharePointAPI {
      */
     @SuppressWarnings("unused")
     public String post(String path, String data, String formDigestValue) {
-        return doPost(path, data, formDigestValue, authToken);
+        return doPost(path, data, authToken);
     }
 
     /**
@@ -53,7 +53,7 @@ public class SharePointAPI {
      */
     @SuppressWarnings("unused")
     public String delete(String path, String formDigestValue) {
-        return doDelete(path, formDigestValue, authToken);
+        return doDelete(path, authToken);
     }
 
     /**
@@ -65,6 +65,7 @@ public class SharePointAPI {
      * @param domain The subdomain of SharePoint
      * @return An instance of the SharePointAPI for making requests to SharePoint
      */
+    @SuppressWarnings("unused")
     public static SharePointAPI getInstance(String username, String password, String domain) {
         return new SharePointAPI(TokenFactory.getToken(username, password, domain));
     }
