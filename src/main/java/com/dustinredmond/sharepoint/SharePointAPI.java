@@ -35,24 +35,20 @@ public class SharePointAPI {
      * Executes a HTTP POST request at the given path.
      * @param path The API endpoint path
      * @param data The data
-     * @param formDigestValue The X-RequestDigest value
      * @return The response as a String
      * @throws RuntimeException If the response's status code is other than 200
      */
-    @SuppressWarnings("unused")
-    public String post(String path, String data, String formDigestValue) {
+    public String post(String path, String data) {
         return doPost(path, data, authToken);
     }
 
     /**
      * Executes a HTTP DELETE request at the given path.
      * @param path The API endpoint path
-     * @param formDigestValue The X-RequestDigest value
      * @return The response as a String
      * @throws RuntimeException If the response's status code is other than 200
      */
-    @SuppressWarnings("unused")
-    public String delete(String path, String formDigestValue) {
+    public String delete(String path) {
         return doDelete(path, authToken);
     }
 
@@ -65,7 +61,6 @@ public class SharePointAPI {
      * @param domain The subdomain of SharePoint
      * @return An instance of the SharePointAPI for making requests to SharePoint
      */
-    @SuppressWarnings("unused")
     public static SharePointAPI getInstance(String username, String password, String domain) {
         return new SharePointAPI(TokenFactory.getToken(username, password, domain));
     }
